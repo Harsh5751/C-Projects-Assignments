@@ -1,0 +1,428 @@
+\documentclass[12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{paralist}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{url}
+
+\oddsidemargin -10mm
+\evensidemargin -10mm
+\textwidth 160mm
+\textheight 200mm
+\renewcommand\baselinestretch{1.0}
+
+\pagestyle {plain}
+\pagenumbering{arabic}
+
+\newcounter{stepnum}
+
+%% Comments
+
+\usepackage{color}
+
+\newif\ifcomments\commentstrue
+
+\ifcomments
+\newcommand{\authornote}[3]{\textcolor{#1}{[#3 ---#2]}}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\else
+\newcommand{\authornote}[3]{}
+\newcommand{\todo}[1]{}
+\fi
+
+\newcommand{\wss}[1]{\authornote{blue}{SS}{#1}}
+
+\title{Assignment 4, Specification}
+\author{SFWR ENG 2AA4}
+
+\begin {document}
+
+\maketitle
+This Module Interface Specification (MIS) document contains modules, types and
+methods for implementing the state of a game of game of life.
+
+\newpage
+
+\section* {Gameboard Types Module}
+
+\subsection*{Module}
+
+GameboardTypes
+
+\subsection* {Uses}
+
+N/A
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Constants}
+
+MAX\_ROWS = 20\\
+MAX\_COLS = 20\\
+
+\subsubsection* {Exported Types}
+
+CellT = \{Dead, Alive\}\\ 
+
+\subsubsection* {Exported Access Programs}
+
+None
+
+\subsection* {Semantics}
+
+\subsubsection* {State Variables}
+
+None
+
+\subsubsection* {State Invariant}
+
+None
+
+\newpage
+
+\section* {Game Board ADT Module}
+
+\subsection*{Template Module}
+
+boardUniverse
+
+\subsection* {Uses}
+
+\noindent GameboardTypes\\
+\noindent ReadWrite\\
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Access Programs}
+
+\begin{tabular}{| l | l | l | l |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+new boardUniverse & ~ & boardUniverse & out\_of\_range\\
+\hline
+overSize & $\mathbb{Z}$, $\mathbb{Z}$ & $\mathbb{B}$ & ~ \\
+\hline
+rowInBound & $\mathbb{Z}$ & $\mathbb{B}$ & ~ \\
+\hline
+colInBound & $\mathbb{Z}$ &  $\mathbb{B}$ & ~ \\
+\hline
+getRows & ~ & $\mathbb{Z}$ & ~ \\
+\hline
+getCols & ~ & $\mathbb{Z}$ & ~ \\
+\hline
+cellState & $\mathbb{Z}$, $\mathbb{Z}$ & CellT & out\_of\_range\\
+\hline
+numAliveNeighbors & $\mathbb{Z}$, $\mathbb{Z}$ & $\mathbb{Z}$ & ~ \\
+\hline
+NextUniverse & ~ & ~ & ~ \\
+\hline
+gameOver &  & $\mathbb{B}$ & \\
+\hline
+\end{tabular}
+
+\subsection* {Semantics}
+
+\subsubsection* {State Variables}
+
+$U$: Universe \textit{\# Gameboard of cells}\\
+$C$: CellT \textit{\# Cells in the gamboard}\\
+
+\subsubsection* {State Invariant}
+
+$|rows| <= MAX\_ROWS$\\
+$|cols| <= MAX\_COLS$\\
+$|rows| = |cols|$\\
+
+\subsubsection* {Assumptions \& Design Decisions}
+
+\begin{itemize}
+
+\item The boardUniverse constructor is called before any other access
+  routine is called on that instance. Once a boardUniverse has been created, the
+  constructor will not be called on it again.
+
+\item The gameboard will always be a square with equal rows and columns.
+
+\item The gameboard will use fixed edges and will not wrap around to the other
+  end of the board. Therefore any cells rotating of the board will not be shown as
+  per the real simulation of the game.
+
+\item For better scalability, this module is specified as an Abstract Data Type
+  (ADT) instead of an Abstract Object. This would allow multiple games to be
+  created and tracked at once by a client.
+
+\item The getter function is provided, though violating the property of being
+  essential, to give a would-be view function easy access to the state of the
+  game. This ensures that the model is able to be easily integrated with a game
+  system in the future.
+
+\end{itemize}
+
+\subsubsection* {Access Routine Semantics}
+
+\noindent boardUniverse():
+\begin{itemize}
+\item transition: 
+\\
+\\$Universe, cols, rows := \text{initUniverse}(), \text{Universe}.\text{size()}, \text{Universe}.\text{size()}$
+\item exception: $exc := \text{overSize}(rows, cols) \Rightarrow \text{out\_of\_range}$
+\end{itemize}
+
+\newpage
+
+\noindent overSize($rows, cols$):
+\begin{itemize}
+\item output: $out := (\text{rows} < MAX\_ROWS \land \text{cols} < MAX\_COLS)$
+
+\item exception: None
+\end{itemize}
+
+\noindent rowInBound($row$):
+\begin{itemize}
+\item output: $out := (\text{rows} < row \lor \text{row} < 0)$
+
+\item exception: None
+\end{itemize}
+
+\noindent colInBound($col$):
+\begin{itemize}
+\item output: $out := (\text{cols} < col \lor \text{col} < 0)$
+
+\item exception: None
+\end{itemize}
+
+\noindent getRows():
+\begin{itemize}
+\item output: $out := rows$
+
+\item exception: None
+\end{itemize}
+
+\noindent getCols():
+\begin{itemize}
+\item output: $out := cols$
+
+\item exception: None
+\end{itemize}
+
+\noindent getUniverse():
+\begin{itemize}
+\item output: $out := Universe$
+
+\item exception: None
+\end{itemize}
+
+\noindent cellState(row, col):
+\begin{itemize}
+\item output: $out := \text{state such that} \text{ Universe}[row][col] = Alive \Rightarrow State = Alive | \text{ Universe}[row][col] = Dead \Rightarrow State = Dead$
+
+\item exception: $\lnot(rowInBound(row) \land colInBound(col)) \Rightarrow out\_of\_range$
+\end{itemize}
+
+\noindent numAliveNeighbors(row, col):
+\begin{itemize}
+\item output: $out := +(\forall\, i: \mathbb{Z} | i \in [-1..1] \cdot \forall\, j : \mathbb{Z} | j \in [-1..1] \cdot ((i \text{ != } 0 \lor j \text{ != } 0) \land (rowInBound(row + i) \land colInBound(col + j)) \land (cellState(i + row, j + col) = Alive)) : 1)$
+
+\item exception: None
+\end{itemize}
+
+\noindent NextUniverse():
+\begin{itemize}
+\item $transition: newUniverse := (\forall\, i: \mathbb{Z} | i \in [0..rows-1] \cdot \forall\, j : \mathbb{Z} | j \in [0..cols-1] \cdot (numAliveNeighbors(i, j) < 2 \land numAliveNeighbors > 3) \Rightarrow newUniverse[i][j] = Dead | (cellState(i,j) = Dead \land numAliveNeighbors = 3) \Rightarrow newUniverse[i][j] = Alive | newUniverse[i][j] = Universe[i][j])$
+\item $transition: Universe := newUniverse$ 
+
+\item exception: None
+\end{itemize}
+
+\noindent gameOver():
+\begin{itemize}
+\item output: $out := +(\forall\, i: \mathbb{Z} | i \in [0..rows-1] \cdot \forall\, j : \mathbb{Z} | j \in [0..cols-1] \cdot \text{Universe}[i][j] = Alive \Rightarrow false) | true$ 
+
+\item exception: None
+\end{itemize}
+
+\newpage
+
+\section* {Display Module}
+
+\subsection* {Module}
+
+DisplayGen
+
+\subsection* {Uses}
+
+GameboardTypes
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Constants}
+
+None
+
+\subsubsection* {Exported Access Programs}
+
+\begin{tabular}{| l | l | l | l |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+showUniverse & seq of seq of CellT & ~ & ~\\
+\hline
+\end{tabular}
+
+\subsection* {Semantics}
+
+\subsubsection* {Environment Variables}
+
+None
+
+\subsubsection* {State Variables}
+
+None
+
+\subsubsection* {State Invariant}
+
+None
+
+\subsubsection* {Access Routine Semantics}
+
+\noindent showUniverse(Universe)
+\begin{itemize}
+\item transition: Iterate through the 2D vector Universe, and print the current state of the cells to the console, with one space between each cell and a newline when the row ends.
+	The concole will print "*" if the cell at row i and column j is alive or else print "-" if the cell is dead.
+
+\end{itemize}
+\newpage
+
+\section* {Read Write Module}
+
+\subsection* {Module}
+
+ReadWrite 
+
+\subsection* {Uses}
+
+GameboardTypes
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Constants}
+
+None
+
+\subsubsection* {Exported Access Programs}
+
+\begin{tabular}{| l | l | l | l |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+readFile & String & seq of char & runtime\_error\\
+\hline
+writeFile & String, seq of seq of CellT & ~ & runtime\_error\\
+\hline
+\end{tabular}
+
+\subsection* {Semantics}
+
+\subsubsection* {Environment Variables}
+
+Initial\_Universe: File containing initial gameboard state\\
+Output\_Universe: File containing output of desired gameboard state\\
+
+\subsubsection* {State Variables}
+
+None
+
+\subsubsection* {State Invariant}
+
+None
+
+\subsubsection* {Assumptions}
+
+The input file will match the given specification.
+
+\subsubsection* {Access Routine Semantics}
+
+\noindent readFile(file)
+\begin{itemize}
+\item transition: read data from the a input file associated with the string s.
+  Use this data to save a sequence of cahrs representing states of the gameboard.
+
+  The text file has the following format, where $"-"$, and $"*"$ stands for strings that
+  represent the state of the cells, CellT, in the gameboard, Dead and Alive, respectively.
+  All data values in a row are separated by one space. Rows are
+  separated by a new line.  The data shown below is for a total of $m$ rows with $m$ columns.
+  The rows and columns have to be equal as the gameboard is an n by n universe.
+
+  \begin{equation}
+    \begin{array}{ccccccc}
+      - & * & * & - & - & ... \\
+      - & * & - & * & - & ... \\
+      - & * & * & - & * & ...
+      \\
+      ..., & ..., & ..., & ..., & ..., & ...
+      \\
+    \end{array}
+  \end{equation}
+
+\item exception: $exc:$ := File not found $\Rightarrow$ runtime\_error\\
+\end{itemize}
+
+\noindent writeFile(file, $vector<vector<CellT>>$) 
+\begin{itemize}
+\item transition: write data from the seq of seq CellT to a file associated with the string s.
+  Output state of the game to file. where $"-"$, and $"*"$ stands for strings that
+  represent the state of the cells, CellT, in the gameboard, Dead and Alive, respectively. Rows are 
+  seperated by a new line and columns by one space. Size of columns and rows are the same, representing a 
+  n by n gamboard.
+  The text file written has the following format. 
+
+  \begin{equation}
+    \begin{array}{ccccccc}
+      - & * & * & - & - & ... \\
+      - & * & - & * & - & ... \\
+      - & * & * & - & * & ...
+      \\
+      ..., & ..., & ..., & ..., & ..., & ...
+      \\
+    \end{array}
+  \end{equation}
+
+\item exception: $exc:$ := File not found $\Rightarrow$ runtime\_error\\
+\end{itemize}
+
+\newpage
+
+\section*{Critique of Design}
+
+\begin{itemize}
+\item The modules in the design of this project include the gameboard module, display/view module, 
+the ReadWrite module, and the gameboardTypes module. The gameboard module is responsible for the state
+of the gameboard and the status of the game. The ReadWrite module reads the state of the gameboard from a text file
+and outputs the state of the game to a text file. The display/view module prints the state of the gameboard to the console.
+The gameboardTypes module defines the state of the cells on the grid of the gameboard and defines the state invariants of size of
+the gameboard. This desgin supports high cohesion as the module gameboard groups methods that all contribute to a single well-defined 
+task of the module which is to change/affect the state of the gameboard and cells of each row and column throught the NextUniverse() method.
+The methods of numAliveNeighbors, cellState, initUniverse, rowInBound, and colInBound all contribute to the single task of NextUniverse() method to
+get the next state of the gameboard. High cohesion reults in low coupling as modules do not rely on each other, and are independent of each other, except
+the gameboard module branches to the ReadWrite module to use one method to read from a text file and initialize the gameboard. The modules also support minimality,
+as no one method accomplishes two tasks. For example, the method rowInBound is only responsible for checking if the row falls within the gameboard bounds, or the NextUniverse()
+method which only changes the state of the gameboard, but calls other methods to accomplish the task, such as numAliveNeighbors to calculate Alive neighbors of a cell; it does not
+do this task within the NextUniverse method itself. Many other methods in the modules in this design follow this principle of minimality. This design and modules also support
+essentiality as no method in modules can perform the task of another method without violating minimality, therefore each method is essential to fulfil the goal of the game. For example, 
+the rowInBound and colInBound can be combined in one method as having both of them is not essential, but doing that will violate minimality. This design also supports information hiding as
+the software module hides information by encapsulating the information into a module which presents the interface. This means the gameboard module supports information hiding as other parts of the 
+program will be protected from extensive modification to gameboard if the design decision is changed. Consistency is used in this design in terms of the GUI. A consistent look and feel
+of using ASCII graphics to represent the state of the game makes it easier for users to examine the gameboard for Alive and Dead cells and the position of the cells. Generality is difficult to design in 
+this design, as the game does not have many components to it, except a simple grid with rows and columns. There isn't a lot going on in the grid except the change it states of the cells, therefore the methods
+are specific in their tasks, and generality is not really needed for this design. Overall, this design supports many of the software engineering principles discussed above.
+\end{itemize}
+
+
+
+\end {document}
